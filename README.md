@@ -10,15 +10,15 @@ Run:
 
 or for user-specified keyboard:
 
-`rosrun keyboard_reader keyboard_event_publisher /dev/input/[event_file_of_the_keyboard]`
+`rosrun keyboard_reader keyboard_event_publisher _path:=<keyboard_event_file_path>`
 
 #### Troubleshooting
-**NB!** Accessing events requires super user access in Ubuntu. Make sure you have proper access, otherwise this package will not work.
+**NB!** Accessing linux events requires root privileges. Make sure you have proper access, otherwise this package will not work.
 
 Use `ls -l /dev/input/event*` to learn which group can access the events.
 
-Then add your username to this group with `sudo usermod -a -G [group_name] [user_name]`, log out and log in.
+Then add your username to this group with `sudo usermod -a -G <group_name> <user_name>`, log out and log in.
 
-In most cases, to make it work, add your username to the group `root`:
+To make it work in most cases, use the following command to add your username to the group `root`, log out, and log in.
 
-`sudo usermod -a -G root [user_name]`
+`sudo usermod -a -G root <user_name>`

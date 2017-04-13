@@ -44,12 +44,13 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-include_directories(include)
+include_directories(include ${catkin_INCLUDE_DIRS})
 
 ## Declare a C++ library
 add_library(keyboard_reader src/keyboard_reader.cpp)
 target_link_libraries(keyboard_reader ${catkin_LIBRARIES})
+add_dependencies(keyboard_reader ${catkin_EXPORTED_TARGETS})
 
 add_executable(keyboard_event_publisher src/keyboard_event_publisher.cpp)
 target_link_libraries(keyboard_event_publisher ${catkin_LIBRARIES} keyboard_reader)
-add_dependencies(keyboard_event_publisher keyboard_reader_gencpp)
+add_dependencies(keyboard_event_publisher keyboard_reader_gencpp ${catkin_EXPORTED_TARGETS})

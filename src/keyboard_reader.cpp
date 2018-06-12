@@ -162,6 +162,7 @@ std::vector <uint16_t> Keyboard::processEvent(struct input_event *ev)
     case EV_MSC:				// this event is always present but no need to do anything
 //       printf("EV_MSC: code=0x%04x, value=0x%08x\n", ev->code, ev->value);
       break;
+    case EV_LED:
     case EV_KEY:				// key event means that a key was either pressed or depressed
       if (ev->value == 1)			// a key was pressed
       {

@@ -157,12 +157,12 @@ std::vector <uint16_t> Keyboard::processEvent(struct input_event *ev)
   switch(ev->type)				// switch to a case based on the event type
   {
     case EV_SYN:				// this event is always present but no need to do anything
-//       printf("EV_SYN: code=0x%04x, value=0x%08x\n", ev->code, ev->value);
+       //printf("EV_SYN: code=0x%04x, value=0x%08x\n", ev->code, ev->value);
       break; 
     case EV_MSC:				// this event is always present but no need to do anything
-//       printf("EV_MSC: code=0x%04x, value=0x%08x\n", ev->code, ev->value);
+       //printf("EV_MSC: code=0x%04x, value=0x%08x\n", ev->code, ev->value);
       break;
-    case EV_LED:
+    case EV_LED:                                // LED event occured (associated with capslock and numlock)
     case EV_KEY:				// key event means that a key was either pressed or depressed
       if (ev->value == 1)			// a key was pressed
       {
@@ -202,10 +202,14 @@ std::vector <uint16_t> Keyboard::getKeyEvent()
   if( r > 0 )
   {
       events = r / sizeof(struct input_event);				// getting the number of events
+      // printf("number of events: , %d\n", events);
       for(i=0; i<events; i++)						// going through all the read events
       {
 	event_info = processEvent(&ibuffer[i]);				// call processEvent() for every read event
-	if (event_info[0] > 0) return event_info;			// return only the code for events different from 0; ie, only when key was pressed or depressed
+	if (event_info[0] > 0)
+        {                                                               // return only the code for events different from 0; ie, only when key was pressed or depressed
+             return event_info;
+        } 
       } //end for
   }
   else

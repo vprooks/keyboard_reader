@@ -43,7 +43,6 @@
 
 /** Main function and a ROS publisher */
 int main(int argc, char *argv[]) {
-  
   // ROS init
   ros::init(argc, argv, "keyboard_event_publisher");
   // Use async spinner
@@ -67,7 +66,7 @@ int main(int argc, char *argv[]) {
 
   // Create a Keyboard object
   Keyboard keyboard(keyboard_path);
-
+  
   // If failed to open any keyboard input event, print info and exit
   if(!keyboard.isReadable())
   {
@@ -84,18 +83,18 @@ int main(int argc, char *argv[]) {
 
   // Vector containing event data
   std::vector <uint16_t> event;
-  
   while(ros::ok())
   {
     event = keyboard.getKeyEvent();				// get key event
 //     ROS_INFO("Ready to publish: %d", event[0]);
     
     // Compose a publishable message
-    key_event.key_code = event[0];				// event code
-    key_event.key_name = keyboard.getKeyName(event[0]);	// string corresponding to event code
-    key_event.key_pressed = (bool)event[1];			// true when key is pressed, false otherwise
-    if (event[0] > 0) pub_keyboard.publish(key_event);		// publish a Key msg only if event code is greater than zero
-    
+    if (event.size() > 0){
+        key_event.key_code = event[0];				// event code
+        key_event.key_name = keyboard.getKeyName(event[0]);	        // string corresponding to event code
+        key_event.key_pressed = (bool)event[1];			// true when key is pressed, false otherwise
+        if (event[0] > 0) pub_keyboard.publish(key_event);		// publish a Key msg only if event code is greater than zero
+    }
   } // end while
   
   // Close keyboard event file

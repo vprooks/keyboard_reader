@@ -17,7 +17,7 @@ or for user-specified keyboard:
 
 Use `ls -l /dev/input/event*` to learn which group can access the events.
 
-Then add your username to this group with `sudo usermod -a -G <group_name> <user_name>`, log out and log in.
+Then add your username to this group with `sudo usermod -a -G <group_name> <user_name>` or `sudo adduser <user_name> <group_name>`, log out and log in. For example, `sudo adduser me input`
 
 To make it work in most cases, use the following command to add your username to the group `root`, log out, and log in.
 

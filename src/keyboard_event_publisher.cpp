@@ -38,6 +38,7 @@
  */
 
 #include "ros/ros.h"
+#include "keyboard_reader/check_for_keyboard_priority.h"
 #include "keyboard_reader/keyboard_reader.h"
 #include "keyboard_reader/Key.h"
 
@@ -75,6 +76,10 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
+  // Determine whether the GUI window with focus should receive keyboard
+  // commands, or if this app should.
+  keyboard_priority::KeyboardPriority keyboard_priority_manager;
+
   // Creates publisher that advertises Key messages on rostopic /keyboard
   ros::Publisher pub_keyboard = nh.advertise<keyboard_reader::Key>("keyboard", 100);
   
@@ -83,21 +88,28 @@ int main(int argc, char *argv[]) {
 
   // Vector containing event data
   std::vector <uint16_t> event;
+  event.clear();
   while(ros::ok())
   {
-    event = keyboard.getKeyEvent();				// get key event
-//     ROS_INFO("Ready to publish: %d", event[0]);
-    
-    // Compose a publishable message
-    if (event.size() > 0){
-        key_event.key_code = event[0];				// event code
-        key_event.key_name = keyboard.getKeyName(event[0]);	        // string corresponding to event code
-        key_event.key_pressed = (bool)event[1];			// true when key is pressed, false otherwise
-        if (event[0] > 0) pub_keyboard.publish(key_event);		// publish a Key msg only if event code is greater than zero
+    // Check whether this app has priority on keyboard events
+    if ( keyboard_priority_manager.checkForKeyboardPriority() )
+    {
+      event = keyboard.getKeyEvent();       // get key event
+
+      // Compose a publishable message
+      if (event.size() > 0){
+          key_event.key_code = event[0];        // event code
+          key_event.key_name = keyboard.getKeyName(event[0]);         // string corresponding to event code
+          key_event.key_pressed = (bool)event[1];     // true when key is pressed, false otherwise
+          if (event[0] > 0) pub_keyboard.publish(key_event);    // publish a Key msg only if event code is greater than zero
+      }
     }
+
+    key_event = keyboard_reader::Key();
+    event.clear();
+    ros::Duration(0.01).sleep();
   } // end while
   
-  // Close keyboard event file
   keyboard.closeKeyboard();
 
   return 0;

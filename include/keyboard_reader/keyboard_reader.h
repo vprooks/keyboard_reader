@@ -34,16 +34,16 @@
  *        Then add your username to this group with ' sudo usermod -a -G group_name user_name '
  */
 
-#include <linux/input.h>
-#include <string.h>
-#include <map>
-#include <vector>
 #include <errno.h>
-#include <stdio.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <glob.h>	// for counting files in a dir (needed for counting event files in /dev/input)
+#include <linux/input.h>
+#include <map>
 #include <sstream>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <vector>
 
 #ifndef KEYBOARD_READER_H
 #define KEYBOARD_READER_H

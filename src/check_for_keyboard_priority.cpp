@@ -1,5 +1,10 @@
 #include "keyboard_reader/check_for_keyboard_priority.h"
 
+// Modified from https://github.com/UltimateHackingKeyboard/current-window-linux/blob/master/get-current-window.c
+// On 8/16/2018
+// Released under the GNU General Public License v3.0
+// https://github.com/UltimateHackingKeyboard/current-window-linux/blob/master/LICENSE
+
 // These aren't in the header due to preprocessor clashing.
 // See https://stackoverflow.com/questions/22400905/eigen-and-cimg-compatibility-issues
 #include "X11/Xatom.h"

@@ -87,26 +87,28 @@ int main(int argc, char *argv[]) {
   keyboard_reader::Key key_event;
 
   // Vector containing event data
-  std::vector <uint16_t> event;
-  event.clear();
+  std::vector <uint16_t> events;
+
   while(ros::ok())
   {
-    // Check whether this app has priority on keyboard events
-    if ( keyboard_priority_manager.checkForKeyboardPriority() )
-    {
-      event = keyboard.getKeyEvent();       // get key event
+    events.clear();
+    events = keyboard.getKeyEvent();
 
-      // Compose a publishable message
-      if (event.size() > 0){
-          key_event.key_code = event[0];        // event code
-          key_event.key_name = keyboard.getKeyName(event[0]);         // string corresponding to event code
-          key_event.key_pressed = (bool)event[1];     // true when key is pressed, false otherwise
-          if (event[0] > 0) pub_keyboard.publish(key_event);    // publish a Key msg only if event code is greater than zero
-      }
+    // Compose a publishable message
+    if (events.size() > 0){
+        key_event.key_code = events[0];        // event code
+        key_event.key_name = keyboard.getKeyName(events[0]);         // string corresponding to event code
+        key_event.key_pressed = (bool)events[1];     // true when key is pressed, false otherwise
+
+        // If the current GUI window is on the whitelist for passing keyboard commands
+        if ( keyboard_priority_manager.checkForKeyboardPriority() )
+        {
+          if (events[0] > 0)
+            pub_keyboard.publish(key_event);    // publish a Key msg only if event code is greater than zero
+        }
     }
 
     key_event = keyboard_reader::Key();
-    event.clear();
     ros::Duration(0.01).sleep();
   } // end while
   

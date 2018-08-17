@@ -32,9 +32,9 @@ namespace keyboard_priority
     // Format longer X11 property strings
     unsigned long getLongProperty(char* property_name);
 
-    // Define any applications that should have keyboard priority
-    // over this app, like terminals and rqt
-    std::vector<std::string> apps_with_higher_priority_{"rqt", "term", "rviz"};
+    // Define any GUI windows that can pass keyboard commands when
+    // they have focus
+    std::vector<std::string> keyboard_whitelist_{"rviz"};
 
     unsigned long window_;
     int screen_;

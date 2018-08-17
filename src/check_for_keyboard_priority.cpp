@@ -32,22 +32,22 @@ KeyboardPriority::~KeyboardPriority()
   XCloseDisplay(display);
 }
 
-// return true if this app has priority
+// return true if the active GUI window is on the whitelist
 bool KeyboardPriority::checkForKeyboardPriority()
 {
   window_ = RootWindow(display, screen_);
   window_ = getLongProperty("_NET_ACTIVE_WINDOW");
 
-  // Compare the name of the active window to the list that has higher priority
+  // Compare the name of the active window to the white list
   std::string window_with_focus(reinterpret_cast<char*>( getStringProperty("WM_CLASS") ));
-  for (int i=0; i<apps_with_higher_priority_.size(); ++i)
+  for (int i=0; i<keyboard_whitelist_.size(); ++i)
   {
-    if ( window_with_focus.find( apps_with_higher_priority_[i] ) != std::string::npos )
-      return false;
+    if ( window_with_focus.find( keyboard_whitelist_[i] ) != std::string::npos )
+      return true;
   }
-  // Otherwise this app should interpret the keyboard commands
+  // Otherwise this app should ignore the keyboard commands
 
-  return true;
+  return false;
 }
 
 void KeyboardPriority::checkStatus(int status, unsigned long window)

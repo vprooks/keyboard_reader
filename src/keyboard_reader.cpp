@@ -38,7 +38,7 @@
 
 
 /** Goes through all the event files in /dev/input/ to locate keyboard.
- *  @return file descriptor if all checks out; -1 otherwise.
+ *  @return file descriptor if all checks out; 0 otherwise.
  */
 int Keyboard::findKeyboard()
 {
@@ -75,24 +75,26 @@ int Keyboard::findKeyboard()
 
   globfree(&gl);					// free memory allocated for globe struct
 
-  return 0;							// return error -1 otherwise
+  return 0;							// return error 0 otherwise
 } // end find_keyboard
 
 
 /** Opens the input device and checks whether its meaningful name (ie, EVIOCGNAME in ioctl()) contains substrings specified in valid_substring.
  *  @param device_path file name of a linux event.
- *  @return file descriptor if open and other checks have been succesfully passed; -1 otherwise.
+ *  @return file descriptor if open and other checks have been succesfully passed; 0 otherwise.
  */
 int Keyboard::openKeyboard( const char *device_path )
 {
   printf("Opening device: %s \n", device_path);
+
   // file descriptor to the opened device. Nonblock so we can spin while waiting for data
-  descriptor_ = open(device_path, O_RDONLY | O_NONBLOCK);
+  descriptor_ = open(device_path, O_RDONLY|O_NONBLOCK,S_IRWXU);
 
   // if failed to open device_path
   if(descriptor_ < 0)
   {
     fprintf(stderr, "Unable to open \"%s\": %s\n", device_path, strerror(errno));
+    printf("Trying again\n");
     return 0;
   }
 
@@ -105,7 +107,7 @@ int Keyboard::openKeyboard( const char *device_path )
   {
     fprintf(stderr, "\"%s\": EVIOCGNAME failed: %s\n", device_path, strerror(errno));
     close(descriptor_);
-    return 0;							// returns -1 if unable to fetch meaningful name
+    return 0;
   }
   
   std::ostringstream sstream;
@@ -240,16 +242,12 @@ std::string Keyboard::getKeyName(uint16_t key_code)
 */  
 bool Keyboard::grabKeyboard()
 {
-  printf("Grabbing the keyboard\n");
-
   ioctl(descriptor_, EVIOCGRAB, 0);
   if(ioctl(descriptor_, EVIOCGRAB, 1))
   {
     printf("Couldn't grab the keyboard. %s.\n", strerror(errno));
     return 0;
   }
-  else
-    printf("Grabbed the keyboard!\n");
 
   return 1;
 }
@@ -259,15 +257,11 @@ bool Keyboard::grabKeyboard()
 */ 
 bool Keyboard::ungrabKeyboard()
 {
-  printf("Un-grabbing the keyboard\n");
-
   if(ioctl(descriptor_, EVIOCGRAB, 0))
   {
     printf("Couldn't un-grab the keyboard. %s.\n", strerror(errno));
     return 0;
   }
-  else
-    printf("Un-grabbed the keyboard!\n");
 
   return 1;
 }

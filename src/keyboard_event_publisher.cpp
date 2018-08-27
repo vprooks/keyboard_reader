@@ -106,9 +106,7 @@ int main(int argc, char *argv[])
 
       // Compose a publishable message
       events.clear();
-      ROS_ERROR_STREAM("Waiting for keyboard event.");
       events = keyboard.getKeyEvent();
-      ROS_ERROR_STREAM("Done reading keyboard event.");
       if (events.size() > 0)
       {
           key_event.key_code = events[0];        // event code
@@ -126,7 +124,6 @@ int main(int argc, char *argv[])
     {
       if ( keyboard_is_grabbed )
       {
-        ROS_WARN_STREAM("UN-GRABBING");
         if ( keyboard.ungrabKeyboard() )
           keyboard_is_grabbed = false;
       }

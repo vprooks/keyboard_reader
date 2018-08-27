@@ -103,10 +103,21 @@ public:
    */
   std::string getKeyName( uint16_t key_code );
 
+  /** Grab the keyboard for this application only
+   */  
+  void grabKeyboard();
+
+  /** Grab the keyboard for this application only
+   */
+  void ungrabKeyboard();
+
 
 private:
   /** File descriptor of the working keyboard event file. */
   int descriptor_;
+
+  /** Path to keyboard events, e.g. "/dev/input/event4" */
+  const char* device_path_ = "";
 
   /** A list of substrings that would indicate that a device is keyboard. */
   std::vector<std::string> valid_substrings =

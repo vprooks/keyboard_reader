@@ -56,23 +56,24 @@ int Keyboard::findKeyboard()
   printf("\x1b[1;33mIf nothing happens when you press keyboard keys, terminate this process and re-start with user-specified device.\n\x1b[0m");
   
   // print all the paths that were found by glob()
-  for(i=0; i<num_event_dev; i++)
+  for(i=0; i<num_event_dev; ++i)
   {
     printf("[%d] %s \n",i, gl.gl_pathv[i]);
   }
   
   // try to open every path found by glob
-  for(i=0; i<num_event_dev; i++)				// go through all relevant event files
+  for(i=0; i<num_event_dev; ++i)				// go through all relevant event files
   {
     r = openKeyboard(gl.gl_pathv[i]);				// try to open an event file
     if(r >= 0)							// if openKeyboard was succesful
     {
+      device_path_ = gl.gl_pathv[i];
       globfree(&gl);						// free memory allocated for globe struct
       return r;							// return descriptor
     } // if
   } // for
 
-  globfree(&gl);						// free memory allocated for globe struct
+  globfree(&gl);					// free memory allocated for globe struct
 
   return -1;							// return error -1 otherwise
 } // end find_keyboard
@@ -85,24 +86,24 @@ int Keyboard::findKeyboard()
 int Keyboard::openKeyboard( const char *device_path )
 {
   printf("Opening device: %s \n", device_path);
-  int fd = open(device_path, O_RDONLY);				// file descriptor to the opened device
+  descriptor_ = open(device_path, O_RDONLY);				// file descriptor to the opened device
 
   // if failed to open device_path
-  if(fd < 0)
+  if(descriptor_ < 0)
   {
     fprintf(stderr, "Unable to open \"%s\": %s\n", device_path, strerror(errno));
     return -1;
   }
 
   /* NOTE: If your keyboard does not have substring specified in valid_substring in its EVIOCNAME, uncomment following line */
-//   return fd;
+//   return descriptor_;
 
   // Following is a fail-safe to avoid opening non-keyboard event by checking if the input device_path has valid_substring in its name.
   char name[255];						// meaningful, ie EVIOCGNAME name
-  if( ioctl(fd, EVIOCGNAME( sizeof(name) ), name ) < 0) 	// fetches the meaningful (ie. EVIOCGNAME) name of the device desribed by descriptor fd
+  if( ioctl(descriptor_, EVIOCGNAME( sizeof(name) ), name ) < 0) 	// fetches the meaningful (ie. EVIOCGNAME) name of the device desribed by descriptor descriptor_
   {
     fprintf(stderr, "\"%s\": EVIOCGNAME failed: %s\n", device_path, strerror(errno));
-    close(fd);
+    close(descriptor_);
     return -1;							// returns -1 if unable to fetch meaningful name
   }
   
@@ -110,18 +111,18 @@ int Keyboard::openKeyboard( const char *device_path )
   sstream << name;						// convert char* to stringstream
   std::string name_as_string = sstream.str();			// stringstream to string
   int i;
-  for (i=0; i < valid_substrings.size(); i++)
+  for (i=0; i < valid_substrings.size(); ++i)
   {
     std::size_t found = name_as_string.find( valid_substrings[i] );// does the meaningful name contain a predefined valid substring
     if (found!=std::string::npos)
     {
       printf("Found \x1b[1;34m'%s'\x1b[0m device. Starting to read ...\n", name);
-      return fd;						// if everything checks out, returns the file descriptor
+      return descriptor_;						// if everything checks out, returns the file descriptor
     } // end if
   } // end for
 
   printf("%s does not seem to be a keyboard.\n", device_path);
-  close(fd);
+  close(descriptor_);
   return -1;
 } // end openKeyboard
 
@@ -186,7 +187,6 @@ std::vector <uint16_t> Keyboard::processEvent(struct input_event *ev)
 
 
 /** Reads event data, and returns relevant info only for EV_KEY events, and dismisses anything that is not a key being pressed or depressed.
- *  @param fd file descriptor for keyboard event file.
  *  @return vector containing two unsigned integers: event code (based on linux/input.h) and event value (1 for pressed, 0 for depressed).
  */
 std::vector <uint16_t> Keyboard::getKeyEvent()
@@ -203,7 +203,7 @@ std::vector <uint16_t> Keyboard::getKeyEvent()
   {
       events = r / sizeof(struct input_event);				// getting the number of events
       // printf("number of events: , %d\n", events);
-      for(i=0; i<events; i++)						// going through all the read events
+      for(i=0; i<events; ++i)						// going through all the read events
       {
 	event_info = processEvent(&ibuffer[i]);				// call processEvent() for every read event
 	if (event_info[0] > 0)
@@ -228,4 +228,20 @@ std::vector <uint16_t> Keyboard::getKeyEvent()
 std::string Keyboard::getKeyName(uint16_t key_code)
 {
     return keymap_[key_code];
+}
+
+
+/** Grab the keyboard for this application only
+*/  
+void Keyboard::grabKeyboard()
+{
+  ;
+}
+
+
+/** Release the keyboard for all applications to use.
+*/ 
+void Keyboard::ungrabKeyboard()
+{
+  ;
 }

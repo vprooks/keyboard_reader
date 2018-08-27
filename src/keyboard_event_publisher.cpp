@@ -42,8 +42,9 @@
 #include "keyboard_reader/keyboard_reader.h"
 #include "keyboard_reader/Key.h"
 
-/** Main function and a ROS publisher */
-int main(int argc, char *argv[]) {
+// Main function and a ROS publisher
+int main(int argc, char *argv[])
+{
   // ROS init
   ros::init(argc, argv, "keyboard_event_publisher");
   // Use async spinner
@@ -103,8 +104,18 @@ int main(int argc, char *argv[]) {
         // If the current GUI window is on the whitelist for passing keyboard commands
         if ( keyboard_priority_manager.checkForKeyboardPriority() )
         {
+          // Grab the keyboard for this application only
+          //keyboard.grabKeyboard();
+
           if (events[0] > 0)
+          {
             pub_keyboard.publish(key_event);    // publish a Key msg only if event code is greater than zero
+          }
+        }
+        else
+        {
+          // Release the keyboard for other applications to use
+          //keyboard.ungrabKeyboard();          
         }
     }
 

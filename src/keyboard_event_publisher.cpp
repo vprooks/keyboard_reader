@@ -90,33 +90,39 @@ int main(int argc, char *argv[])
   // Vector containing event data
   std::vector <uint16_t> events;
 
+  bool keyboard_was_grabbed = false;
+
   while(ros::ok())
   {
     events.clear();
     events = keyboard.getKeyEvent();
 
-    // Compose a publishable message
-    if (events.size() > 0){
-        key_event.key_code = events[0];        // event code
-        key_event.key_name = keyboard.getKeyName(events[0]);         // string corresponding to event code
-        key_event.key_pressed = (bool)events[1];     // true when key is pressed, false otherwise
+    // If the current GUI window is on the whitelist for passing keyboard commands
+    if ( keyboard_priority_manager.checkForKeyboardPriority() )
+    {
+      // Grab the keyboard for this application only
+      keyboard.grabKeyboard();
+      keyboard_was_grabbed = true;
 
-        // If the current GUI window is on the whitelist for passing keyboard commands
-        if ( keyboard_priority_manager.checkForKeyboardPriority() )
-        {
-          // Grab the keyboard for this application only
-          //keyboard.grabKeyboard();
+      // Compose a publishable message
+      if (events.size() > 0)
+      {
+          key_event.key_code = events[0];        // event code
+          key_event.key_name = keyboard.getKeyName(events[0]);         // string corresponding to event code
+          key_event.key_pressed = (bool)events[1];     // true when key is pressed, false otherwise
+      }
 
-          if (events[0] > 0)
-          {
-            pub_keyboard.publish(key_event);    // publish a Key msg only if event code is greater than zero
-          }
-        }
-        else
-        {
-          // Release the keyboard for other applications to use
-          //keyboard.ungrabKeyboard();          
-        }
+      if (events[0] > 0)
+      {
+        pub_keyboard.publish(key_event);    // publish a Key msg only if event code is greater than zero
+      }
+    }
+    // Release the keyboard for other applications to use
+    else if (keyboard_was_grabbed)
+    {
+      while ( !keyboard.ungrabKeyboard() )
+        ros::Duration(0.1).sleep();
+      keyboard_was_grabbed = false;        
     }
 
     key_event = keyboard_reader::Key();

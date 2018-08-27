@@ -75,7 +75,7 @@ int Keyboard::findKeyboard()
 
   globfree(&gl);					// free memory allocated for globe struct
 
-  return -1;							// return error -1 otherwise
+  return 0;							// return error -1 otherwise
 } // end find_keyboard
 
 
@@ -92,7 +92,7 @@ int Keyboard::openKeyboard( const char *device_path )
   if(descriptor_ < 0)
   {
     fprintf(stderr, "Unable to open \"%s\": %s\n", device_path, strerror(errno));
-    return -1;
+    return 0;
   }
 
   /* NOTE: If your keyboard does not have substring specified in valid_substring in its EVIOCNAME, uncomment following line */
@@ -104,7 +104,7 @@ int Keyboard::openKeyboard( const char *device_path )
   {
     fprintf(stderr, "\"%s\": EVIOCGNAME failed: %s\n", device_path, strerror(errno));
     close(descriptor_);
-    return -1;							// returns -1 if unable to fetch meaningful name
+    return 0;							// returns -1 if unable to fetch meaningful name
   }
   
   std::ostringstream sstream;
@@ -123,7 +123,7 @@ int Keyboard::openKeyboard( const char *device_path )
 
   printf("%s does not seem to be a keyboard.\n", device_path);
   close(descriptor_);
-  return -1;
+  return 0;
 } // end openKeyboard
 
 
@@ -141,7 +141,8 @@ void Keyboard::closeKeyboard()
  */
 bool Keyboard::isReadable ()
 {
-  if (descriptor_ < 0) return false;
+  if (descriptor_ < 0) 
+    return false;
   return true;
 }
 
@@ -233,15 +234,36 @@ std::string Keyboard::getKeyName(uint16_t key_code)
 
 /** Grab the keyboard for this application only
 */  
-void Keyboard::grabKeyboard()
+bool Keyboard::grabKeyboard()
 {
-  ;
+  printf("Grabbing the keyboard\n");
+
+  ioctl(descriptor_, EVIOCGRAB, 0);
+  if(ioctl(descriptor_, EVIOCGRAB, 1))
+  {
+    printf("Couldn't grab the keyboard. %s.\n", strerror(errno));
+    return 0;
+  }
+  else
+    printf("Grabbed the keyboard!\n");
+
+  return 1;
 }
 
 
 /** Release the keyboard for all applications to use.
 */ 
-void Keyboard::ungrabKeyboard()
+bool Keyboard::ungrabKeyboard()
 {
-  ;
+  printf("Un-grabbing the keyboard");
+
+  if(ioctl(descriptor_, EVIOCGRAB, 0))
+  {
+    printf("Couldn't un-grab the keyboard. %s.\n", strerror(errno));
+    return 0;
+  }
+  else
+    printf("Un-grabbed the keyboard!\n");
+
+  return 1;
 }

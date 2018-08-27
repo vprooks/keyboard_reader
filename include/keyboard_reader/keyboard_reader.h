@@ -105,11 +105,11 @@ public:
 
   /** Grab the keyboard for this application only
    */  
-  void grabKeyboard();
+  bool grabKeyboard();
 
   /** Grab the keyboard for this application only
    */
-  void ungrabKeyboard();
+  bool ungrabKeyboard();
 
 
 private:

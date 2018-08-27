@@ -90,21 +90,25 @@ int main(int argc, char *argv[])
   // Vector containing event data
   std::vector <uint16_t> events;
 
-  bool keyboard_was_grabbed = false;
+  bool keyboard_is_grabbed = false;
 
   while(ros::ok())
   {
-    events.clear();
-    events = keyboard.getKeyEvent();
-
     // If the current GUI window is on the whitelist for passing keyboard commands
     if ( keyboard_priority_manager.checkForKeyboardPriority() )
     {
-      // Grab the keyboard for this application only
-      keyboard.grabKeyboard();
-      keyboard_was_grabbed = true;
+      // Grab the keyboard for this application, if it hasn't been already
+      if ( !keyboard_is_grabbed )
+      {
+        keyboard.grabKeyboard();
+        keyboard_is_grabbed = true;
+      }
 
       // Compose a publishable message
+      events.clear();
+      ROS_ERROR_STREAM("Waiting for keyboard event.");
+      events = keyboard.getKeyEvent();
+      ROS_ERROR_STREAM("Done reading keyboard event.");
       if (events.size() > 0)
       {
           key_event.key_code = events[0];        // event code
@@ -118,13 +122,17 @@ int main(int argc, char *argv[])
       }
     }
     // Release the keyboard for other applications to use
-    else if (keyboard_was_grabbed)
+    else
     {
-      while ( !keyboard.ungrabKeyboard() )
-        ros::Duration(0.1).sleep();
-      keyboard_was_grabbed = false;        
+      if ( keyboard_is_grabbed )
+      {
+        ROS_WARN_STREAM("UN-GRABBING");
+        if ( keyboard.ungrabKeyboard() )
+          keyboard_is_grabbed = false;
+      }
     }
 
+    // Clear for the next round
     key_event = keyboard_reader::Key();
     ros::Duration(0.01).sleep();
   } // end while

@@ -86,7 +86,8 @@ int Keyboard::findKeyboard()
 int Keyboard::openKeyboard( const char *device_path )
 {
   printf("Opening device: %s \n", device_path);
-  descriptor_ = open(device_path, O_RDONLY);				// file descriptor to the opened device
+  // file descriptor to the opened device. Nonblock so we can spin while waiting for data
+  descriptor_ = open(device_path, O_RDONLY | O_NONBLOCK);
 
   // if failed to open device_path
   if(descriptor_ < 0)
@@ -203,13 +204,16 @@ std::vector <uint16_t> Keyboard::getKeyEvent()
   if( r > 0 )
   {
       events = r / sizeof(struct input_event);				// getting the number of events
-      // printf("number of events: , %d\n", events);
-      for(i=0; i<events; ++i)						// going through all the read events
+
+      // going through all the read events
+      for(i=0; i<events; ++i)
       {
-	event_info = processEvent(&ibuffer[i]);				// call processEvent() for every read event
-	if (event_info[0] > 0)
-        {                                                               // return only the code for events different from 0; ie, only when key was pressed or depressed
-             return event_info;
+        // call processEvent() for every read event
+	      event_info = processEvent(&ibuffer[i]);
+	      // return only the code for events different from 0; ie, only when key was pressed or depressed
+        if (event_info[0] > 0)
+        {
+          return event_info;
         } 
       } //end for
   }
@@ -255,7 +259,7 @@ bool Keyboard::grabKeyboard()
 */ 
 bool Keyboard::ungrabKeyboard()
 {
-  printf("Un-grabbing the keyboard");
+  printf("Un-grabbing the keyboard\n");
 
   if(ioctl(descriptor_, EVIOCGRAB, 0))
   {

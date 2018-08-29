@@ -221,7 +221,7 @@ std::vector <uint16_t> Keyboard::getKeyEvent()
   }
   else
   {
-    fprintf(stderr, "read() failed: %s\n", strerror(errno));	// let user know that read() failed
+    printf("read() failed: %s\n", strerror(errno));	// let user know that read() failed
     return {0, 0};
   }
 

@@ -34,7 +34,6 @@
  *        Then add your username to this group with ' sudo usermod -a -G group_name user_name '
  */
 
-#include <errno.h>
 #include <fcntl.h>
 #include <glob.h>	// for counting files in a dir (needed for counting event files in /dev/input)
 #include <linux/input.h>

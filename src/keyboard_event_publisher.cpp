@@ -94,31 +94,28 @@ int main(int argc, char *argv[])
 
   while(ros::ok())
   {
-    // If the current GUI window is on the whitelist for passing keyboard commands
-    if ( keyboard_priority_manager.checkForKeyboardPriority() )
+    // Grab the keyboard for this application, if it hasn't been already
+    if ( !keyboard_is_grabbed )
     {
-      // Grab the keyboard for this application, if it hasn't been already
-      if ( !keyboard_is_grabbed )
-      {
-        keyboard.grabKeyboard();
-        keyboard_is_grabbed = true;
-      }
-
-      // Compose a publishable message
-      events.clear();
-      events = keyboard.getKeyEvent();
-      if (events.size() > 0)
-      {
-          key_event.key_code = events[0];        // event code
-          key_event.key_name = keyboard.getKeyName(events[0]);         // string corresponding to event code
-          key_event.key_pressed = (bool)events[1];     // true when key is pressed, false otherwise
-      }
-
-      if (events[0] > 0)
-      {
-        pub_keyboard.publish(key_event);    // publish a Key msg only if event code is greater than zero
-      }
+      keyboard.grabKeyboard();
+      keyboard_is_grabbed = true;
     }
+
+    // Compose a publishable message
+    events.clear();
+    events = keyboard.getKeyEvent();
+    if (events.size() > 0)
+    {
+        key_event.key_code = events[0];        // event code
+        key_event.key_name = keyboard.getKeyName(events[0]);         // string corresponding to event code
+        key_event.key_pressed = (bool)events[1];     // true when key is pressed, false otherwise
+    }
+
+    if (events[0] > 0)
+    {
+      pub_keyboard.publish(key_event);    // publish a Key msg only if event code is greater than zero
+    }
+
     // Release the keyboard for other applications to use
     else
     {

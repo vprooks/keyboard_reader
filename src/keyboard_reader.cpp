@@ -1,20 +1,20 @@
 // Copyright (c) 2015-2016, The University of Texas at Austin
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
-// 
+//
 //     * Redistributions of source code must retain the above copyright
 //       notice, this list of conditions and the following disclaimer.
-// 
+//
 //     * Redistributions in binary form must reproduce the above copyright
 //       notice, this list of conditions and the following disclaimer in the
 //       documentation and/or other materials provided with the distribution.
-// 
+//
 //     * Neither the name of the copyright holder nor the names of its
 //       contributors may be used to endorse or promote products derived from
 //       this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 // ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,9 +27,9 @@
 // SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 /** @file keyboard_reader.cpp
- * 
+ *
  *  @author karl.kruusamae(at)utexas.edu
- * 
+ *
  *  NOTE: If you get permission denied when starting this node. Use ' ls -l /dev/input/event* ' to learn which group can access the events.
  *        Then add your username to this group with ' sudo usermod -a -G group_name user_name '
  */
@@ -51,16 +51,16 @@ int Keyboard::findKeyboard()
   {
     num_event_dev = gl.gl_pathc;				// get the number of matching event files
   }
-  
+
   printf("\x1b[1;32mHere is the list of likely candiates for your keyboard. This function always starts with the \x1b[4mfirst one on the list.\x1b[0m ");
   printf("\x1b[1;33mIf nothing happens when you press keyboard keys, terminate this process and re-start with user-specified device.\n\x1b[0m");
-  
+
   // print all the paths that were found by glob()
   for(i=0; i<num_event_dev; ++i)
   {
     printf("[%d] %s \n",i, gl.gl_pathv[i]);
   }
-  
+
   // try to open every path found by glob
   for(i=0; i<num_event_dev; ++i)				// go through all relevant event files
   {
@@ -109,7 +109,7 @@ int Keyboard::openKeyboard( const char *device_path )
     close(descriptor_);
     return 0;
   }
-  
+
   std::ostringstream sstream;
   sstream << name;						// convert char* to stringstream
   std::string name_as_string = sstream.str();			// stringstream to string
@@ -144,7 +144,7 @@ void Keyboard::closeKeyboard()
  */
 bool Keyboard::isReadable ()
 {
-  if (descriptor_ < 0) 
+  if (descriptor_ < 0)
     return false;
   return true;
 }
@@ -158,12 +158,12 @@ std::vector <uint16_t> Keyboard::processEvent(struct input_event *ev)
 {
 
   std::vector <uint16_t> event;			// output vector
-  
+
   switch(ev->type)				// switch to a case based on the event type
   {
     case EV_SYN:				// this event is always present but no need to do anything
        //printf("EV_SYN: code=0x%04x, value=0x%08x\n", ev->code, ev->value);
-      break; 
+      break;
     case EV_MSC:				// this event is always present but no need to do anything
        //printf("EV_MSC: code=0x%04x, value=0x%08x\n", ev->code, ev->value);
       break;
@@ -199,10 +199,10 @@ std::vector <uint16_t> Keyboard::getKeyEvent()
   struct input_event ibuffer[BUFFER_SIZE];				// see: https://www.kernel.org/doc/Documentation/input/input.txt
   int r, events, i;
   std::vector <uint16_t> event_info;					// processed event
-  
+
   // read events to input_event buffer
   r = read(descriptor_, ibuffer, sizeof(struct input_event) * BUFFER_SIZE);
-  
+
   if( r > 0 )
   {
       events = r / sizeof(struct input_event);				// getting the number of events
@@ -216,7 +216,7 @@ std::vector <uint16_t> Keyboard::getKeyEvent()
         if (event_info[0] > 0)
         {
           return event_info;
-        } 
+        }
       } //end for
   }
   else
@@ -239,22 +239,22 @@ std::string Keyboard::getKeyName(uint16_t key_code)
 
 
 /** Grab the keyboard for this application only
-*/  
+*/
 bool Keyboard::grabKeyboard()
 {
   ioctl(descriptor_, EVIOCGRAB, 0);
-  if(ioctl(descriptor_, EVIOCGRAB, 1))
-  {
-    printf("Couldn't grab the keyboard. %s.\n", strerror(errno));
-    return 0;
-  }
-
+  // if(ioctl(descriptor_, EVIOCGRAB, 1))
+  // {
+  //   printf("Couldn't grab the keyboard. %s.\n", strerror(errno));
+  //   return 0;
+  // }
+  ioctl(descriptor_, EVIOCGRAB, 1);
   return 1;
 }
 
 
 /** Release the keyboard for all applications to use.
-*/ 
+*/
 bool Keyboard::ungrabKeyboard()
 {
   if(ioctl(descriptor_, EVIOCGRAB, 0))
